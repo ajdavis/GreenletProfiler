@@ -10,7 +10,7 @@ Documentation: http://greenlet-profiler.readthedocs.org/
 About
 =====
 
-A low-overhead deterministic performance profiler, similar to cProfiler or
+A low-overhead deterministic performance profiler, similar to cProfile or
 `yappi`_, which understands greenlet context-switches. Suitable for
 profiling Gevent-based applications.
 
