@@ -14,15 +14,6 @@ def find_func(ystats, name):
     return items[0]
 
 
-def find_child(yfuncstats, name):
-    items = [
-        ychildstat for ychildstat in yfuncstats.children
-        if ychildstat.name == name]
-
-    assert len(items) == 1
-    return items[0]
-
-
 def assert_children(yfuncstats, names, msg):
     names = set(names)
     callees = set([
