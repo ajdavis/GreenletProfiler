@@ -19,12 +19,11 @@ Programming Language :: Python :: Implementation :: CPython
 """
 
 description = 'Greenlet-aware Python performance profiler, built on yappi.'
-
 long_description = open("README.rst").read()
-
-major, minor = sys.version_info[:2]
-
 packages = ['greenlet_profiler']
+if 'nosetests' in sys.argv:
+    packages.append('test')
+
 setup(
     name='greenlet-profiler',
     version='0.1',
@@ -37,4 +36,6 @@ setup(
     install_requires=['yappi'],
     license='http://www.apache.org/licenses/LICENSE-2.0',
     classifiers=filter(None, classifiers.split('\n')),
-    keywords='greenlet gevent profiler asynchronous')
+    keywords='greenlet gevent profiler asynchronous',
+    # use python setup.py nosetests to test
+    setup_requires=['nose'])
