@@ -20,7 +20,7 @@ Programming Language :: Python :: Implementation :: CPython
 
 description = 'Greenlet-aware Python performance profiler, built on yappi.'
 long_description = open("README.rst").read()
-packages = ['greenlet_profiler']
+packages = []
 if 'nosetests' in sys.argv:
     packages.append('test')
 
@@ -28,6 +28,7 @@ setup(
     name='greenlet-profiler',
     version='0.1',
     packages=packages,
+    py_modules=['greenlet_profiler'],
     description=description,
     long_description=long_description,
     author='A. Jesse Jiryu Davis',
