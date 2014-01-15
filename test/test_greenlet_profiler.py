@@ -140,5 +140,76 @@ class GreenletTest(unittest.TestCase):
         self.assertAlmostEqual(c_stat.tsub, 0,
                                places=2, msg="c()'s subtotal is wrong")
 
+    def test_recursion(self):
+        def r(n):
+            spin(1)
+            gr_main.switch()
+            if n > 1:
+                r(n - 1)
+
+            gr_main.switch()
+
+        def s(n):
+            spin(1)
+            gr_main.switch()
+            if n > 1:
+                s(n - 1)
+
+            gr_main.switch()
+
+        greenlet_profiler.set_clock_type('cpu')
+        greenlet_profiler.start(builtins=True)
+        gr_main = greenlet.getcurrent()
+        g0 = greenlet.greenlet(partial(r, 10))  # Run r 10 times.
+        g0.switch()
+        g1 = greenlet.greenlet(partial(s, 2))  # Run s 2 times.
+        g1.switch()
+        greenlets = [g0, g1]
+
+        # Run all greenlets to completion.
+        while greenlets:
+            runlist = greenlets[:]
+            for g in runlist:
+                g.switch()
+                if not g:
+                    # Finished.
+                    greenlets.remove(g)
+
+        greenlet_profiler.stop()
+        ystats = greenlet_profiler.get_func_stats()
+
+        # Check the stats for spin().
+        spin_stat = find_func(ystats, 'spin')
+        self.assertEqual(12, spin_stat.ncall)
+
+        # r() ran spin(1) 10 times, s() ran spin(1) 2 times.
+        self.assertNear(12, spin_stat.ttot / self.spin_cost)
+        assert_children(spin_stat, ['range'], 'spin() has wrong callees')
+
+        # Check the stats for r().
+        r_stat = find_func(ystats, 'r')
+        self.assertEqual(10, r_stat.ncall)
+        assert_children(
+            r_stat,
+            ['spin', 'r', "<method 'switch' of 'greenlet.greenlet' objects>"],
+            'r() has wrong callees')
+
+        self.assertNear(10, r_stat.ttot / self.spin_cost)
+        self.assertNear(1, r_stat.tavg / self.spin_cost)
+        self.assertAlmostEqual(0, r_stat.tsub, places=3)
+
+        # Check the stats for s().
+        s_stat = find_func(ystats, 's')
+        self.assertEqual(2, s_stat.ncall)
+        assert_children(
+            s_stat,
+            ['spin', 's', "<method 'switch' of 'greenlet.greenlet' objects>"],
+            's() has wrong callees')
+
+        self.assertNear(2, s_stat.ttot / self.spin_cost)
+        self.assertNear(1, s_stat.tavg / self.spin_cost)
+        self.assertAlmostEqual(0, s_stat.tsub, places=3)
+
+
 if __name__ == '__main__':
     unittest.main()
