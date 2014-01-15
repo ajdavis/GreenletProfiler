@@ -1,7 +1,8 @@
+from functools import partial
 import unittest
-from time import sleep
 
 import greenlet
+
 import greenlet_profiler
 
 
@@ -26,55 +27,84 @@ def assert_children(yfuncstats, names, msg):
     assert names == callees, final_msg
 
 
+def spin(n):
+    for _ in range(n * 10000):
+        pass
+
+
 class GreenletTest(unittest.TestCase):
+    spin_cost = None
+
+    @classmethod
+    def setUpClass(cls):
+        # Measure the CPU cost of spin() as a baseline.
+        greenlet_profiler.set_clock_type('cpu')
+        greenlet_profiler.start()
+        for _ in range(10):
+            spin(1)
+        greenlet_profiler.stop()
+        f_stats = greenlet_profiler.get_func_stats()
+        spin_stat = find_func(f_stats, 'spin')
+        GreenletTest.spin_cost = spin_stat.ttot / 10.0
+        greenlet_profiler.clear_stats()
+
+    def tearDown(self):
+        greenlet_profiler.stop()
+        greenlet_profiler.clear_stats()
+
+    def assertNear(self, x, y, margin=0.2):
+        if abs(x - y) / float(x) > margin:
+            raise AssertionError(
+                "%s is not within %d%% of %s" % (x, margin * 100, y))
+
     def test_three_levels(self):
         def a():
             gr_main.switch()
             b()
-            sleep(0.1)
+            spin(1)
 
         def b():
-            sleep(0.05)
+            spin(5)
             gr_main.switch()
             c()
         
         def c():
-            sleep(0.03)
+            spin(7)
         
-        greenlet_profiler.set_clock_type('WALL')
+        greenlet_profiler.set_clock_type('cpu')
         greenlet_profiler.start(builtins=True)
         gr_main = greenlet.getcurrent()
         g = greenlet.greenlet(a)
         g.switch()
-        sleep(0.1)
+        spin(2)
         g.switch()
-        sleep(0.1)
+        spin(3)
         g.switch()
         self.assertFalse(g, 'greenlet not complete')
         greenlet_profiler.stop()
 
         ystats = greenlet_profiler.get_func_stats()
 
-        # Check the stats for sleep().
-        sleep_stat = find_func(ystats, 'sleep')
-        self.assertEqual(5, sleep_stat.ncall, 'sleep not called 5 times')
-        self.assertAlmostEqual(0.38, sleep_stat.ttot,
-                               places=2, msg="sleep()'s total time is wrong")
+        # Check the stats for spin().
+        spin_stat = find_func(ystats, 'spin')
+        self.assertEqual(5, spin_stat.ncall)
+        self.assertAlmostEqual(18 * self.spin_cost, spin_stat.ttot,
+                               places=2, msg="spin()'s total time is wrong")
 
-        assert_children(sleep_stat, [], 'sleep should have no callees')
+        assert_children(spin_stat, ['range'], 'spin() has wrong callees')
 
         # Check the stats for a().
         a_stat = find_func(ystats, 'a')
         self.assertEqual(1, a_stat.ncall, 'a() not called once')
         assert_children(
             a_stat,
-            ['sleep', 'b', "<method 'switch' of 'greenlet.greenlet' objects>"],
+            ['spin', 'b', "<method 'switch' of 'greenlet.greenlet' objects>"],
             'a() has wrong callees')
 
-        self.assertAlmostEqual(a_stat.ttot, 0.18,
+        self.assertAlmostEqual(13 * self.spin_cost, a_stat.ttot,
                                places=2, msg="a()'s total time is wrong")
 
-        self.assertAlmostEqual(a_stat.tavg, 0.18,
+        self.assertAlmostEqual(13 * self.spin_cost, a_stat.tavg,
                                places=2, msg="a()'s average time is wrong")
 
         self.assertAlmostEqual(a_stat.tsub, 0,
@@ -85,13 +115,13 @@ class GreenletTest(unittest.TestCase):
         self.assertEqual(1, b_stat.ncall, 'b() not called once')
         assert_children(
             b_stat,
-            ['sleep', 'c', "<method 'switch' of 'greenlet.greenlet' objects>"],
+            ['spin', 'c', "<method 'switch' of 'greenlet.greenlet' objects>"],
             'b() has wrong callees')
 
-        self.assertAlmostEqual(b_stat.ttot, 0.08,
+        self.assertAlmostEqual(12 * self.spin_cost, b_stat.ttot,
                                places=2, msg="b()'s total time is wrong")
 
-        self.assertAlmostEqual(b_stat.tavg, 0.08,
+        self.assertAlmostEqual(12 * self.spin_cost, b_stat.tavg,
                                places=2, msg="b()'s average time is wrong")
 
         self.assertAlmostEqual(b_stat.tsub, 0,
@@ -100,11 +130,11 @@ class GreenletTest(unittest.TestCase):
         # Check the stats for c().
         c_stat = find_func(ystats, 'c')
         self.assertEqual(1, c_stat.ncall, 'c() not called once')
-        assert_children(c_stat, ['sleep'], 'c() has wrong callees')
-        self.assertAlmostEqual(c_stat.ttot, 0.03,
+        assert_children(c_stat, ['spin'], 'c() has wrong callees')
+        self.assertAlmostEqual(7 * self.spin_cost, c_stat.ttot,
                                places=2, msg="c()'s total time is wrong")
 
-        self.assertAlmostEqual(c_stat.tavg, 0.03,
+        self.assertAlmostEqual(7 * self.spin_cost, c_stat.tavg,
                                places=2, msg="c()'s average time is wrong")
 
         self.assertAlmostEqual(c_stat.tsub, 0,
