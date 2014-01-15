@@ -38,10 +38,20 @@ def main():
         default=False,
         help="Profiles only the thread that calls start(). [default: False]")
 
+    clock_types = ['wall', 'cpu']
+    parser.add_option(
+        "-c", "--clock_type",
+        dest="clock_type",
+        type='choice',
+        choices=clock_types,
+        default='cpu',
+        help="One of %s" % clock_types)
+
     options, args = parser.parse_args()
 
     if len(args) > 0:
         sys.path.insert(0, os.path.dirname(args[0]))
+        set_clock_type(options.clock_type)
         start(options.profile_builtins, not options.profile_single_thread)
         if sys.version_info >= (3, 0):
             exec (compile(open(args[0]).read(), args[0], 'exec'),
