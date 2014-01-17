@@ -38,7 +38,7 @@ yappi_extension = Extension(
 
 classifiers = """\
 Intended Audience :: Developers
-License :: OSI Approved :: Apache Software License
+License :: OSI Approved :: MIT License
 Development Status :: 1 - Planning
 Natural Language :: English
 Programming Language :: Python :: 2
