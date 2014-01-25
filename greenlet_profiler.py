@@ -13,6 +13,9 @@ def start(builtins=False, profile_threads=True):
     """Start profiler."""
     # TODO: what about builtins False or profile_threads False?
     _yappi.set_context_id_callback(lambda: id(greenlet.getcurrent()))
+    _yappi.set_context_name_callback(
+        lambda: greenlet.getcurrent().__class__.__name__)
+
     _yappi.start(builtins, profile_threads)
 
 
