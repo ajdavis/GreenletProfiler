@@ -11,8 +11,6 @@ import pickle
 import marshal
 import threading
 
-import _kcachegrind
-
 
 class YappiError(Exception): pass
 
@@ -140,23 +138,6 @@ def convert2pstats(stats):
         _pdict[pstat_id(fs)] = (fs.ncall, fs.nactualcall, fs.tsub, fs.ttot, _callers[fs], )        
      
     return pstats.Stats(_PStatHolder(_pdict))
-
-
-def convert2kcachegrind(stats, out_file):
-    """
-    Writes the internal stat type of yappi (which is returned by a call to
-    YFuncStats.get()) in a format which is readable by kcachegrind.
-
-    'out_file' can be a filename or an open file object.
-    """
-    if not isinstance(stats, YFuncStats):
-        raise YappiError("Source stats must be derived from YFuncStats.")
-
-    if isinstance(out_file, (str, unicode)):
-        out_file = open(out_file, 'w')
-
-    _kcachegrind.convert(stats, out_file)
-    out_file.close()
 
 
 class StatString(object):
