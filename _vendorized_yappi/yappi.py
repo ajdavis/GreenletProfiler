@@ -10,8 +10,7 @@ import _yappi
 import pickle
 import marshal
 import threading
-
-
+        
 class YappiError(Exception): pass
 
 __all__ = ['start', 'stop', 'get_func_stats', 'get_thread_stats', 'clear_stats', 'is_running',
@@ -138,8 +137,8 @@ def convert2pstats(stats):
         _pdict[pstat_id(fs)] = (fs.ncall, fs.nactualcall, fs.tsub, fs.ttot, _callers[fs], )        
      
     return pstats.Stats(_PStatHolder(_pdict))
-
-
+    
+    
 class StatString(object):
     """
     Class to prettify/trim a profile result column.
@@ -777,6 +776,19 @@ def set_context_id_callback(callback):
     >>> yappi.set_context_id_callback(lambda: id(greenlet.getcurrent()))
     """
     return _yappi.set_context_id_callback(callback)
+
+def set_context_name_callback(callback):
+    """
+    Use a string other than the current thread's class name as the context's
+    name.
+
+    The callback must take no arguments and return a string. For example:
+
+    >>> import greenlet, yappi
+    >>> yappi.set_context_name_callback(
+    ...     lambda: greenlet.getcurrent().__class__.__name__)
+    """
+    return _yappi.set_context_name_callback(callback)
 
 def main():
     from optparse import OptionParser
