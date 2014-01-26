@@ -6,7 +6,10 @@
 """
 import os
 import sys
-import _yappi
+# Yappi's C extension, _yappi.so, which we've renamed to
+# _GreenletProfiler_yappi.so to avoid any confusion if both
+# GreenletProfiler and Yappi are installed.
+import _GreenletProfiler_yappi as _yappi
 import pickle
 import marshal
 import threading

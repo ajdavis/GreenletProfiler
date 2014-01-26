@@ -27,7 +27,7 @@ if os.name == 'posix' and sys.platform != 'darwin':
         user_libraries.append('rt')
 
 yappi_extension = Extension(
-    '_yappi',
+    '_GreenletProfiler_yappi',
     sources=[
         '_vendorized_yappi/_yappi.c',
         '_vendorized_yappi/callstack.c',
@@ -70,7 +70,8 @@ setup(
     name='GreenletProfiler',
     version='0.1',
     packages=packages,
-    # Include yappi's C extension, _yappi.so.
+    # Include Yappi's C extension, _yappi.so, which we've renamed to
+    # _GreenletProfiler_yappi.so.
     ext_modules=[yappi_extension],
     # Include yappi.py along with our own GreenletProfiler.py.
     py_modules=[
