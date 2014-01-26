@@ -3,7 +3,7 @@ import sys
 
 import greenlet
 
-import _vendorized_yappi.yappi as _yappi
+import _vendorized_yappi
 from _vendorized_yappi.yappi import (
     is_running, convert2pstats, get_func_stats, get_thread_stats, clear_stats,
     set_clock_type, get_clock_type, get_mem_usage)
@@ -38,8 +38,8 @@ def stop():
 
     The same profiling session can be resumed later by calling start().
     """
-    _yappi.stop()
-    _yappi.set_context_id_callback(None)
+    _vendorized_yappi.yappi.stop()
+    _vendorized_yappi.yappi.set_context_id_callback(None)
 
 
 def main():
