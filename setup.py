@@ -5,6 +5,7 @@ from setuptools import Extension
 from setuptools import setup
 
 # For now, greenlet-profiler includes a patched version of Sumer Cip's yappi.
+# For now, GreenletProfiler includes a patched version of Sumer Cip's yappi.
 # The original yappi source is at https://bitbucket.org/sumerc/yappi, and my
 # fork is at https://bitbucket.org/emptysquare/gappi. The patched source is
 # included in this project in the _vendorized_yappi directory, and the
@@ -60,18 +61,21 @@ if 'nosetests' in sys.argv:
     packages.append('test')
 
 setup(
-    name='greenlet-profiler',
+    name='GreenletProfiler',
     version='0.1',
     packages=packages,
     # Include yappi's C extension, _yappi.so.
     ext_modules=[yappi_extension],
-    # Include yappi.py along with our own greenlet_profiler.py.
-    py_modules=['_vendorized_yappi/yappi', '_vendorized_yappi/__init__', 'greenlet_profiler'],
+    # Include yappi.py along with our own GreenletProfiler.py.
+    py_modules=[
+        '_vendorized_yappi/yappi',
+        '_vendorized_yappi/__init__',
+        'GreenletProfiler'],
     description=description,
     long_description=long_description,
     author='A. Jesse Jiryu Davis',
     author_email='jesse@emptysquare.net',
-    url='http://github.com/ajdavis/greenlet-profiler/',
+    url='http://github.com/ajdavis/GreenletProfiler/',
     license='http://www.apache.org/licenses/LICENSE-2.0',
     classifiers=filter(None, classifiers.split('\n')),
     keywords='greenlet gevent profiler asynchronous',
