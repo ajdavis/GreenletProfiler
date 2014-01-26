@@ -4,7 +4,12 @@ from distutils.ccompiler import new_compiler
 from setuptools import Extension
 from setuptools import setup
 
-# For now, greenlet-profiler includes a patched version of Sumer Cip's yappi.
+# Hack to silence atexit traceback in newer python versions.
+try:
+    import multiprocessing
+except ImportError:
+    pass
+
 # For now, GreenletProfiler includes a patched version of Sumer Cip's yappi.
 # The original yappi source is at https://bitbucket.org/sumerc/yappi, and my
 # fork is at https://bitbucket.org/emptysquare/gappi. The patched source is
@@ -81,4 +86,5 @@ setup(
     keywords='greenlet gevent profiler asynchronous',
     # use python setup.py nosetests to test
     setup_requires=['nose'],
+    test_suite='nose.collector',
     zip_safe=False)
