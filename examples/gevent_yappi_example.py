@@ -1,26 +1,24 @@
 import gevent
 import yappi
 
-
 MILLION = 1000 * 1000
 
-
 def foo():
-    for _ in range(20 * MILLION):
-        pass
-
-    gevent.spawn(bar).join()
-
+    for i in range(20 * MILLION):
+        if not i % MILLION:
+            gevent.sleep(0)
 
 def bar():
-    gevent.sleep(0)
-    for _ in range(10 * MILLION):
-        pass
+    for i in range(10 * MILLION):
+        if not i % MILLION:
+            gevent.sleep(0)
 
 yappi.set_clock_type('cpu')
-yappi.start()
-gevent.spawn(foo).join()
+yappi.start(builtins=True)
+foo_greenlet = gevent.spawn(foo)
+bar_greenlet = gevent.spawn(bar)
+foo_greenlet.join()
+bar_greenlet.join()
 yappi.stop()
 stats = yappi.get_func_stats()
-stats.debug_print()
 stats.save('yappi.callgrind', type='callgrind')

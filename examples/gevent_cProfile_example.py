@@ -1,25 +1,27 @@
 import cProfile
-import pstats
+
 import gevent
+import lsprofcalltree
 
 MILLION = 1000 * 1000
 
 
 def foo():
-    for _ in range(20 * MILLION):
-        pass
-
-    gevent.spawn(bar).join()
-
+    for i in range(20 * MILLION):
+        if not i % MILLION:
+            gevent.sleep(0)
 
 def bar():
-    gevent.sleep(0)
-    for _ in range(10 * MILLION):
-        pass
+    for i in range(10 * MILLION):
+        if not i % MILLION:
+            gevent.sleep(0)
 
 profile = cProfile.Profile()
 profile.enable()
-gevent.spawn(foo).join()
+foo_greenlet = gevent.spawn(foo)
+bar_greenlet = gevent.spawn(bar)
+foo_greenlet.join()
+bar_greenlet.join()
 profile.disable()
-stats = pstats.Stats(profile)
-stats.dump_stats('cProfile.stats')
+stats = lsprofcalltree.KCacheGrind(profile)
+stats.output(open('gevent_cProfile_example.callgrind', 'w'))
