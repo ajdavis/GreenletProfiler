@@ -84,6 +84,7 @@ setup(
     license='http://www.apache.org/licenses/LICENSE-2.0',
     classifiers=filter(None, classifiers.split('\n')),
     keywords='greenlet gevent profiler asynchronous',
+    install_requires=['greenlet'],
     # use python setup.py nosetests to test
     setup_requires=['nose'],
     test_suite='nose.collector',
