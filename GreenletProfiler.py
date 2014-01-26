@@ -6,11 +6,25 @@ import greenlet
 import _vendorized_yappi.yappi as _yappi
 from _vendorized_yappi.yappi import (
     is_running, convert2pstats, get_func_stats, get_thread_stats, clear_stats,
-    set_clock_type, get_clock_type)
+    set_clock_type, get_clock_type, get_mem_usage)
 
+
+__all__ = [
+    'start', 'stop', 'clear_stats', 'get_func_stats', 'get_thread_stats',
+    'is_running', 'get_clock_type', 'set_clock_type', 'get_mem_usage',
+    'convert2pstats',
+]
 
 def start(builtins=False, profile_threads=True):
-    """Start profiler."""
+    """Starts profiling all threads and all greenlets.
+
+    This function can be called from any thread at any time.
+    Resumes profiling if stop() was called previously.
+
+    * `builtins`: Profile builtin functions used by standart Python modules.
+    * `profile_threads`: Profile all threads if ``True``, else profile only the
+      calling thread.
+    """
     # TODO: what about builtins False or profile_threads False?
     _yappi.set_context_id_callback(lambda: id(greenlet.getcurrent()))
     _yappi.set_context_name_callback(
@@ -20,7 +34,10 @@ def start(builtins=False, profile_threads=True):
 
 
 def stop():
-    """Stop profiler."""
+    """Stops the currently running yappi instance.
+
+    The same profiling session can be resumed later by calling start().
+    """
     _yappi.stop()
     _yappi.set_context_id_callback(None)
 
