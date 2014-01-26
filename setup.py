@@ -35,6 +35,7 @@ yappi_extension = Extension(
         '_vendorized_yappi/mem.c',
         '_vendorized_yappi/freelist.c',
         '_vendorized_yappi/timing.c'],
+    include_dirs=['_vendorized_yappi'],
     define_macros=user_macros,
     libraries=user_libraries,
     extra_compile_args=compile_args,
