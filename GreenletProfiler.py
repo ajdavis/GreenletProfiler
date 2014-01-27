@@ -26,11 +26,13 @@ def start(builtins=False, profile_threads=True):
       calling thread.
     """
     # TODO: what about builtins False or profile_threads False?
-    _yappi.set_context_id_callback(lambda: id(greenlet.getcurrent()))
-    _yappi.set_context_name_callback(
-        lambda: greenlet.getcurrent().__class__.__name__)
+    _vendorized_yappi.yappi.set_context_id_callback(
+        lambda: greenlet and id(greenlet.getcurrent()) or 0)
 
-    _yappi.start(builtins, profile_threads)
+    _vendorized_yappi.yappi.set_context_name_callback(
+        lambda: greenlet and greenlet.getcurrent().__class__.__name__ or '')
+
+    _vendorized_yappi.yappi.start(builtins, profile_threads)
 
 
 def stop():
