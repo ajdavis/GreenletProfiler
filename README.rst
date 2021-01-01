@@ -2,7 +2,7 @@
 GreenletProfiler
 ================
 
-:Info: Greenlet-aware Python performance profiler, built on yappi.
+:Info: Abandoned, please use Yappi
 :Author: A\. Jesse Jiryu Davis
 
 Documentation: http://GreenletProfiler.readthedocs.org/
@@ -10,9 +10,13 @@ Documentation: http://GreenletProfiler.readthedocs.org/
 About
 =====
 
+This was a greenlet-aware Python performance profiler, built on yappi.
+
 A low-overhead deterministic performance profiler, similar to cProfile or
 `Yappi`_, which understands greenlet context-switches. Suitable for
 profiling Gevent-based applications.
+
+Yappi now has Greenlet support, please use it instead.
 
 .. _Yappi: https://code.google.com/p/yappi/
 
